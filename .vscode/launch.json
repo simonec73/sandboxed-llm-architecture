@@ -1,0 +1,19 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Python: parametrized-llm",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "/home/simonec/Projects/parametrized-llm-architecture/start.py",
+            "console": "integratedTerminal",
+            "cwd": "${workspaceFolder}",
+            "env": {
+                "DEBUGPY_LOG_LEVEL": "ERROR"
+            }
+        }
+    ]
+}

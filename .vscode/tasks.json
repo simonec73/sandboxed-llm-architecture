@@ -1,0 +1,46 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Verify Python: Compile",
+      "type": "shell",
+      "command": "${command:python.interpreterPath}",
+      "args": ["-m", "compileall", "."],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "Verify Python: Ruff",
+      "type": "shell",
+      "command": "${command:python.interpreterPath}",
+      "args": ["-m", "ruff", "check", "."],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "Verify Python: Mypy",
+      "type": "shell",
+      "command": "${command:python.interpreterPath}",
+      "args": ["-m", "mypy", ".", "--check-untyped-defs"],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "Verify Python",
+      "dependsOrder": "sequence",
+      "dependsOn": [
+        "Verify Python: Compile",
+        "Verify Python: Ruff",
+        "Verify Python: Mypy"
+      ],
+      "group": "build",
+      "problemMatcher": []
+    }
+  ]
+}

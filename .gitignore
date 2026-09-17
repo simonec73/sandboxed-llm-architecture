@@ -216,3 +216,6 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+
+# Additional application-specific ignores can be added below this line.
+models.yaml
