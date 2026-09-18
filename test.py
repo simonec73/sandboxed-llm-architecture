@@ -3,7 +3,6 @@
 import http.client
 import json
 
-
 HOST = "127.0.0.1"
 PORT = 10421
 ENDPOINT = "/v1/chat/completions"

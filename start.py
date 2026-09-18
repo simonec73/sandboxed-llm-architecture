@@ -2,7 +2,6 @@
 
 import importlib
 import json
-import os
 import time
 from collections.abc import Iterator
 from contextlib import asynccontextmanager
