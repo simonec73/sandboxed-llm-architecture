@@ -75,13 +75,15 @@ def run_server(host: str = "127.0.0.1", port: int = 10421):
     import sys
     import termios
     _original_term_attrs: list[Any] | None = None
+    fd: int | None = None
     if sys.stdin.isatty():
         try:
-            fd: int | Any = sys.stdin.fileno()
-            _original_term_attrs = termios.tcgetattr(fd)
-            new_attrs = termios.tcgetattr(fd)
+            stdin_fd = sys.stdin.fileno()
+            fd = stdin_fd
+            _original_term_attrs = termios.tcgetattr(stdin_fd)
+            new_attrs = termios.tcgetattr(stdin_fd)
             new_attrs[3] &= ~termios.ECHOCTL
-            termios.tcsetattr(fd, termios.TCSANOW, new_attrs)
+            termios.tcsetattr(stdin_fd, termios.TCSANOW, new_attrs)
         except termios.error:
             _original_term_attrs = None
 
@@ -89,7 +91,7 @@ def run_server(host: str = "127.0.0.1", port: int = 10421):
         logger.info(f"Starting sandboxed-llm on http://{host}:{port}")
         uvicorn.run(app, host=host, port=port)
     finally:
-        if _original_term_attrs is not None:
+        if _original_term_attrs is not None and fd is not None:
             try:
                 termios.tcsetattr(fd, termios.TCSANOW, _original_term_attrs)
             except termios.error:
