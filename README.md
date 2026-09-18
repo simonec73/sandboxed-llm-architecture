@@ -11,19 +11,6 @@ Prompt injection exists partly because an LLM receives instructions and data as 
 
 The central idea is not simply to add another prompt-injection detector. It is to identify untrusted data explicitly, keep it outside the privileged instruction context, and apply validation, transformation, or any other required control to that data before a controlled merge. Trusted instructions do not need to pass through the same pipeline, and raw untrusted content does not need to enter the main model's context.
 
-### Why this may be stronger than existing mitigations
-
-The approach has two properties that make it potentially more effective than controls applied to a conventional, already-merged prompt:
-
-1. **Isolation of untrusted data.** Parameterized queries are effective against SQL injection because values are identified as data and kept separate from executable query structure. This proposal applies the same security principle to LLM inputs: content classified as data is denied direct access to the instruction-following and agentic context. Detection-based defenses must recognize every attack pattern; isolation instead constrains where the untrusted content is allowed to go.
-2. **A modular control boundary.** The summarizer in this PoC is only one possible transformation. The data path could independently include schema validation, parsing, normalization, provenance checks, content filtering, deterministic extraction, policy enforcement, malware scanning, redaction, an isolated LLM, or human approval. Controls can be selected and composed according to the data type and threat model before any approved result is merged into the main context.
-
-The distinction matters: validation and transformation are performed on the input that is actually untrusted, rather than indiscriminately on the complete prompt. This preserves trusted system and user directives, gives security controls a clear scope, and creates an explicit boundary whose input, output, and failures can be inspected. The final merge contains only the representation produced or approved by that boundary.
-
-Many prompt-injection defenses inspect an already-composed input, sometimes using another LLM to classify the whole prompt. Such validation can detect known or recognizable attacks, but it must infer which tokens are instructions and which are untrusted data after they have already been combined. An explicit `data` category identifies the at-risk input before composition, allowing controls to focus on that input without altering trusted instructions. It also creates a dedicated place for validation, rejection, deterministic parsing, redaction, transformation, isolated model processing, or human review. These operations are possible as ordinary preprocessing, but the proposed contract makes their security purpose, scope, and destination explicit and consistently enforceable.
-
-This is why the proposal may be more than another mitigation applied to a mixed prompt. If every correctly classified data item is kept outside the privileged context and only an approved representation can cross the boundary, the direct prompt-injection channel from that raw data is removed rather than merely monitored. In that scoped sense, the architecture has the potential to become for prompt injection what parameterized queries are for SQL injection: a standard structural separation between instructions and untrusted values. It does not yet provide the same deterministic guarantee, because classification can be wrong and natural-language processing or transformation can preserve adversarial influence. The analogy describes the intended security architecture, not an equivalence of assurance.
-
 The proposal extends the familiar `system`, `user`, and `assistant` message roles with a separate top-level `data` collection. Data may contain documents, retrieved records, file contents, or other untrusted artifacts. When the data path is configured and used, the main model never receives those artifacts directly:
 
 1. The API routes every data node to a dedicated sandbox model.
@@ -48,6 +35,37 @@ In the current PoC, the modular pipeline consists of one control: an isolated sa
 
 > [!IMPORTANT]
 > The approach preserves compatibility with current inference stacks. It is implemented in host code around existing GGUF models and `llama.cpp`; it does not require a new transformer architecture or retraining.
+
+### Why this may be stronger than existing mitigations
+
+The approach has two properties that make it potentially more effective than controls applied to a conventional, already-merged prompt:
+
+1. **Isolation of untrusted data.** Parameterized queries are effective against SQL injection because values are identified as data and kept separate from executable query structure. This proposal applies the same security principle to LLM inputs: content classified as data is denied direct access to the instruction-following and agentic context. Detection-based defenses must recognize every attack pattern; isolation instead constrains where the untrusted content is allowed to go.
+2. **A modular control boundary.** The summarizer in this PoC is only one possible transformation. The data path could independently include schema validation, parsing, normalization, provenance checks, content filtering, deterministic extraction, policy enforcement, malware scanning, redaction, an isolated LLM, or human approval. Controls can be selected and composed according to the data type and threat model before any approved result is merged into the main context.
+
+The distinction matters: validation and transformation are performed on the input that is actually untrusted, rather than indiscriminately on the complete prompt. This preserves trusted system and user directives, gives security controls a clear scope, and creates an explicit boundary whose input, output, and failures can be inspected. The final merge contains only the representation produced or approved by that boundary.
+
+### Traditional prompt-injection defenses and their main gaps
+
+The conventional approaches to prompt injection generally include a few familiar mechanisms:
+
+- Delimiters, instructions, and role separation such as clearly marking text as data or using special formatting.
+- Input filtering, sanitization, and heuristics that attempt to strip or rewrite suspicious text.
+- Prompt-injection classifiers or second-pass validation models that inspect a composed prompt for adversarial instructions.
+- “Be careful with untrusted content” instructions, defensive prompting, and negative examples meant to reduce model compliance.
+- Tool restrictions, allowlists, and approval gates that limit the damage a compromised agent can do after the model has reasoned over attacker-controlled text.
+
+These are useful and often necessary, but they share three major problems:
+
+1. They are usually applied after the instructions and data have already been mixed into one context. At that point, the model has already seen the raw tokens and the attack may have influenced reasoning, tool choice, or policy-following behavior.
+2. They are primarily detection-first rather than structure-first. Filters, delimiters, and classifiers can miss novel attacks, adversarial wording, or indirect prompt injection. A model-based detector has to guess which tokens are instructions and which are data after the fact; that is an inherently ambiguous problem in a merged prompt.
+3. Detection gates are typically binary: if an attack is detected, the input is blocked; otherwise, the entire untrusted input passes into the privileged context unchanged. Their protection therefore depends on detection accuracy, while prompt-level measures such as delimiters and defensive instructions remain advisory rather than enforcing isolation.
+
+This is the gap the present architecture addresses. It does not rely on a single “good detector” to find every malicious pattern. Instead, it treats data as a distinct category, routes it through a lower-privilege processing path, and merges only an approved transformation into the main model context. That changes the problem from “can we detect malicious instructions in a mixed prompt?” to “can we keep raw untrusted content outside the privileged instruction context and only allow validated results across the boundary?”
+
+Many prompt-injection defenses inspect an already-composed input, sometimes using another LLM to classify the whole prompt. Such validation can detect known or recognizable attacks, but it must infer which tokens are instructions and which are untrusted data after they have already been combined. An explicit `data` category identifies the at-risk input before composition, allowing controls to focus on that input without altering trusted instructions. It also creates a dedicated place for validation, rejection, deterministic parsing, redaction, transformation, isolated model processing, or human review. These operations are possible as ordinary preprocessing, but the proposed contract makes their security purpose, scope, and destination explicit and consistently enforceable.
+
+This is why the proposal may be more than another mitigation applied to a mixed prompt. If every correctly classified data item is kept outside the privileged context and only an approved representation can cross the boundary, the direct prompt-injection channel from that raw data is removed rather than merely monitored. In that scoped sense, the architecture has the potential to become for prompt injection what parameterized queries are for SQL injection: a standard structural separation between instructions and untrusted values. It does not yet provide the same deterministic guarantee, because classification can be wrong and natural-language processing or transformation can preserve adversarial influence. The analogy describes the intended security architecture, not an equivalence of assurance.
 
 ### Why a lightweight, platform-independent architecture matters
 
