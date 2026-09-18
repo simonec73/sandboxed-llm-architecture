@@ -9,11 +9,11 @@ def static_init(cls):
 
 def get_yaml(name: str) -> str | None:
     # Check if there is a file with the given name and extension .yaml searching it in the following paths:
-    # 1. Folder .parametrized-llm under the user's home directory
+    # 1. Folder .sandboxed-llm under the user's home directory
     # 2. BASE directory
     # 3. The current working directory
     paths = [
-        Path.home() / ".parametrized-llm" / f"{name}.yaml",
+        Path.home() / ".sandboxed-llm" / f"{name}.yaml",
         BASE / f"{name}.yaml",
         Path.cwd() / f"{name}.yaml",
     ]
@@ -28,7 +28,7 @@ def get_yamls(path: str) -> list[str] | None:
     # 2. BASE directory
     # 3. The current working directory
     paths = [
-        Path.home() / ".parametrized-llm" / path,
+        Path.home() / ".sandboxed-llm" / path,
         BASE / path,
         Path.cwd() / path,
     ]

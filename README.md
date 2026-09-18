@@ -1,4 +1,4 @@
-# Parametrized LLM Architecture
+# Sandboxed LLM Architecture
 
 This project is a proof of concept (PoC) for mitigating prompt injection by separating instructions from untrusted data. It introduces a new `data` input category and processes it through an isolated LLM before the main, potentially agentic, model sees it.
 
@@ -336,7 +336,7 @@ The provided installer assumes:
 - Build tools required by `llama-cpp-python`
 - Enough disk space for two local GGUF model files
 
-The script creates a Python 3.12 Conda environment named `parametrized-llm`, installs the Python dependencies, installs CUDA-enabled PyTorch, and builds `llama-cpp-python` with CUDA support. Its package index currently targets CUDA 13.3; adjust `install.sh` if the local driver/toolkit requires a different build.
+The script creates a Python 3.12 Conda environment named `sandboxed-llm`, installs the Python dependencies, installs CUDA-enabled PyTorch, and builds `llama-cpp-python` with CUDA support. Its package index currently targets CUDA 13.3; adjust `install.sh` if the local driver/toolkit requires a different build.
 
 ## Installation
 
@@ -351,7 +351,7 @@ For subsequent shells, activate the environment with:
 
 ```bash
 source ~/miniconda3/etc/profile.d/conda.sh
-conda activate parametrized-llm
+conda activate sandboxed-llm
 ```
 
 Download the desired GGUF models separately. Model files are not included in this repository.
@@ -373,7 +373,7 @@ Do not put secrets in `.env`; the current PoC does not require credentials or AP
 
 ### Create `models.yaml`
 
-Create `models.yaml` in the repository root, or place it at `~/.parametrized-llm/models.yaml`. It must be a YAML list containing at least the main and sandbox models:
+Create `models.yaml` in the repository root, or place it at `~/.sandboxed-llm/models.yaml`. It must be a YAML list containing at least the main and sandbox models:
 
 ```yaml
 - model: phi4
@@ -401,7 +401,7 @@ The important settings are:
 
 Optional settings include `chat_format`, `jinja`, `bos`, `eos`, `rope_freq_scale`, `flash_attention`, `n_threads`, and `n_batch`. Normally, the embedded GGUF chat template and token metadata should be used.
 
-Model lookup checks `~/.parametrized-llm/models.yaml` first, then the repository root, then the current directory. Be aware that a user-level file therefore overrides the repository file.
+Model lookup checks `~/.sandboxed-llm/models.yaml` first, then the repository root, then the current directory. Be aware that a user-level file therefore overrides the repository file.
 
 ## Choosing models and memory placement
 
@@ -482,7 +482,7 @@ Check that:
 - `.env` is in the repository root and contains the exact sandbox model name.
 - Both names match entries in `models.yaml`, including case.
 - Every `model_path` is absolute and points to an existing GGUF file.
-- A stale `~/.parametrized-llm/models.yaml` is not overriding the repository configuration.
+- A stale `~/.sandboxed-llm/models.yaml` is not overriding the repository configuration.
 
 The `GET /v1/models` endpoint lists only entries whose model files exist.
 

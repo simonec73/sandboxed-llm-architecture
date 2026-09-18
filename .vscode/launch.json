@@ -5,10 +5,10 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "Python: parametrized-llm",
+            "name": "Python: sandboxed-llm",
             "type": "debugpy",
             "request": "launch",
-            "program": "/home/simonec/Projects/parametrized-llm-architecture/start.py",
+            "program": "/home/simonec/Projects/sandboxed-llm-architecture/start.py",
             "console": "integratedTerminal",
             "cwd": "${workspaceFolder}",
             "env": {

@@ -12,7 +12,7 @@ from fastapi import FastAPI, HTTPException
 from fastapi.responses import StreamingResponse
 from pydantic import BaseModel
 
-print("parametrized-llm v1.0 - An LLM Server to test a parametrized LLM architecture, created by Simone Curzi.")
+print("sandboxed-llm v1.0 - An LLM Server to test a sandboxed LLM architecture, created by Simone Curzi.")
 
 from logging_config import logger
 from src.data_classes import RequestParams
@@ -86,7 +86,7 @@ def run_server(host: str = "127.0.0.1", port: int = 10421):
             _original_term_attrs = None
 
     try:
-        logger.info(f"Starting parametrized-llm on http://{host}:{port}")
+        logger.info(f"Starting sandboxed-llm on http://{host}:{port}")
         uvicorn.run(app, host=host, port=port)
     finally:
         if _original_term_attrs is not None:
@@ -107,7 +107,7 @@ async def lifespan(_app: FastAPI):
 
         print("All resources have been released.")
 
-app = FastAPI(title="parametrized-llm", lifespan=lifespan)
+app = FastAPI(title="sandboxed-llm", lifespan=lifespan)
 model_manager: ModelManager
 session_manager: SessionManager
 
@@ -120,7 +120,7 @@ def list_openai_models():
             {
                 "id": model_info.name,
                 "object": "model",
-                "owned_by": "parametrized-llm",
+                "owned_by": "sandboxed-llm",
             }
             for model_info in model_manager.get_model_infos()
         ],

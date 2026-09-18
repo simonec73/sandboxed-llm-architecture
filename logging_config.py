@@ -8,7 +8,7 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-logger = logging.getLogger("parametrized-llm")
+logger = logging.getLogger("sandboxed-llm")
 
 # Force logging when debugging
 is_debugging = sys.gettrace() is not None

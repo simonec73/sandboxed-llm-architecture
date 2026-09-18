@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -e
 
-ENV_NAME="parametrized-llm"
+ENV_NAME="sandboxed-llm"
 
 # 1. Enter python environment
 source ~/miniconda3/etc/profile.d/conda.sh
